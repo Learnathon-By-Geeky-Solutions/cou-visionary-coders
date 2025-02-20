@@ -1,44 +1,39 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import useApi from "./useApi";
-import Logout from "./Logout";
+import { useState, useContext } from "react";
+import { Link,useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import dashboardIcon from "../assets/dashboard.png";
 import logoutIcon from "../assets/logout.png";
 import signupIcon from "../assets/signup.png";
 import loginIcon from "../assets/login.png";
+import { AuthContext } from "../Hooks/contextApi/UserContext";
+
 
 function Nav() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isValid, setIsValid] = useState<boolean | null>(null);
-  const api = useApi();
-
-  useEffect(() => {
-    const validateToken = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setIsValid(false);
-        return;
-      }
-
-      try {
-        await api.get("/validate-token");
-        setIsValid(true);
-      } catch {
-        setIsValid(false);
-      }
-    };
-
-    validateToken();
-  }, [api]);
+  
+  // Get AuthContext and ensure it's not null
+  const authContext = useContext(AuthContext);
+  const navigate = useNavigate();
+  
+  // Check if authContext is available and extract user and logOut
+  let user = authContext?.user;
+  const logOut = authContext?.logOut;
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleLogout = async () => {
+    if (logOut) {
+      await logOut();
+      navigate("/login");
+      user = null ;
+    }
+  };
+
   return (
-    <header className="flex flex-col sm:flex-row items-center justify-between bg-gradient-to-r from-sky-800 to-pink-500 text-white sm:px-6">
+    <header className="flex flex-col sm:flex-row items-center justify-between drop-shadow-xl bg-gradient-to-r from-sky-800 to-pink-500 text-white sm:px-6">
       {/* Logo and Mobile Menu Toggle */}
       <div className="flex flex-row border-b-2 sm:border-none p-4 items-center justify-between w-full sm:w-auto">
         <img
@@ -96,7 +91,8 @@ function Nav() {
           isMobileMenuOpen ? "block" : "hidden"
         } sm:flex sm:flex-row sm:items-center sm:gap-10`}
       >
-        {isValid ? (
+        {user ? (
+          // If the user is logged in
           <ul className="flex flex-col sm:flex-row items-center justify-evenly sm:gap-10">
             <li className="px-2 py-1 m-1 rounded-md border-2 hover:font-bold sm:m-0 grow hover:bg-pink-400">
               <Link to="/biodata">Biodata</Link>
@@ -109,20 +105,21 @@ function Nav() {
               <img src={dashboardIcon} alt="Dashboard" className="w-8 px-1" />
               <Link to="/dashboard">Dashboard</Link>
             </li>
-            <li className="flex flex-row px-2 py-1 m-1 rounded-md border-2 hover:font-bold sm:m-0 grow hover:bg-pink-400">
+            <li
+              className="flex flex-row px-2 py-1 m-1 rounded-md border-2 hover:font-bold sm:m-0 grow hover:bg-pink-400"
+            >
               <img src={logoutIcon} alt="Logout" className="w-8 px-1" />
-              <Link to="/login">
-                <Logout />
-              </Link>
+              <button onClick={handleLogout}>Logout</button>
             </li>
           </ul>
         ) : (
+          // If the user is logged out
           <ul className="flex flex-col sm:flex-row items-center justify-evenly sm:gap-10">
             <li className="px-2 py-1 m-1 rounded-md border-2 hover:font-bold sm:m-0 grow hover:bg-pink-400">
               <Link to="/home">Home</Link>
             </li>
             <li className="px-2 py-1 m-1 rounded-md border-2 hover:font-bold sm:m-0 grow hover:bg-pink-400">
-              <Link to="/about">About Us</Link>
+              <Link to="/aboutus">About Us</Link>
             </li>
             <li className="flex flex-row px-2 py-1 m-1 rounded-md border-2 hover:font-bold sm:m-0 grow hover:bg-pink-400">
               <img src={signupIcon} alt="Sign Up" className="w-8 px-1" />

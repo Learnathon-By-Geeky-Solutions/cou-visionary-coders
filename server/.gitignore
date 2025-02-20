@@ -1,3 +1,11 @@
+<<<<<<< HEAD
 node_modules
 dist*
 .env
+.vercel
+=======
+node_modules
+dist*
+.env
+.vercel
+>>>>>>> df72d9571f5e3f84e6269a8fe9de8c58b43381b6
